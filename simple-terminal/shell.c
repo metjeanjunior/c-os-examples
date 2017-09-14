@@ -36,10 +36,11 @@ int main(int argc, char **argv)
 	// STAILQ_HEAD(stailhead, Node) head;
 	struct stailhead head = STAILQ_HEAD_INITIALIZER(head);
 	STAILQ_INIT(&head);
+	getcwd(cwd, sizeof(cwd));
 
 	while(1)
 	{
-		printf("==> ");
+		printf("%s$", cwd);
 		fgets(string, 80, stdin);
 		getArguments(string,args);
 
@@ -48,7 +49,7 @@ int main(int argc, char **argv)
 			exit(0);
 		else if(strcmp(args[0], "cd") == 0)
 		{
-			if (getcwd(cwd, sizeof(cwd)) != NULL)
+			if (cwd != NULL)
 			{
 				// inspired by: https://stackoverflow.com/questions/3642050/chdir-not-affecting-environment-variable-pwd
 				if(chdir(args[1])==0)
