@@ -29,7 +29,8 @@ int main(int argc, char **argv)
 	char cwd[1024];
 
 	int status;
-	int count = 0;
+	int pidcount = 0;
+	int argcount;
 	pid_t pid;
 
 	// STAILQ_HEAD(stailhead, Node) head = STAILQ_HEAD_INITIALIZER(head);
@@ -40,11 +41,10 @@ int main(int argc, char **argv)
 
 	while(1)
 	{
-		printf("%s$", cwd);
+		printf("%s$ ", cwd);
 		fgets(string, 80, stdin);
-		getArguments(string,args);
+		argcount = getArguments(string,args);
 
-		// if (strcmp(args[0], "exit\n") == 0)
 		if (strcmp(args[0], "exit") == 0)
 			exit(0);
 		else if(strcmp(args[0], "cd") == 0)
@@ -79,22 +79,36 @@ int main(int argc, char **argv)
 		switch (pid = fork()) 
 		{ 
 			case 0:
+				if(argcount > 1 && strcmp(args[1], "<") == 0)
+				{
+					if (!freopen(args[2], "r", stdin))
+						perror("can't be open for i/p redirection.");
+				}
+
+				if(argcount > 1 && strcmp(args[argcount-2], ">") == 0)
+				{
+					if (!freopen(args[argcount-1], "w", stdout))
+						perror("can't be open for i/p redirection.");
+				}
+
 				execvp(args[0], args);
 				perror(KRED "Error: Command could not be executed");
 				printf(KNRM "");
 				exit(1); 
 			default:
-				waitpid(pid, &status, 0);
+				if (strcmp(args[argcount-1], "&") != 0)
+				{
+					waitpid(pid, &status, 0);
+				}
 
-				if (count == 5)
+				if (pidcount == 5)
 				{
 				    struct Node *nps = STAILQ_FIRST(&head);
-				    // STAILQ_REMOVE(&head, nps, Node, nodes);
 			        STAILQ_REMOVE_HEAD(&head, nodes);
 			        free(nps);
 				}
 				else
-					count++;
+					pidcount++;
 
 				struct Node * node = malloc(sizeof(struct Node));
 				node->pid=pid;
@@ -119,4 +133,5 @@ int getArguments(char *line, char **args)
 	argcount++;
 	while ( (args[argcount] = strtok (NULL, delimiters)) )
 		argcount++;
+	return argcount;
 }

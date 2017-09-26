@@ -4,5 +4,7 @@
 
 * cd does work properly. This can easily be tested using the [environ](environ) binary.
 
+* a trivial implementation of file redirection when using user generated binaries
+
 * showpid is a built-in command that shows the pid of the last 5 forked proccesses.
     * This is implemented using a simple [queue](https://www.freebsd.org/cgi/man.cgi?query=queue#SINGLY-LINKED_TAIL_QUEUES).
